@@ -11,21 +11,21 @@
     <Button 
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-	    android:text="@String/cmd.home"
-	    android:onClick="homeClick"/>
+	    android:text="@string/cmd.home"
+	    android:onClick="onHomeClick"/>
     <Button 
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-	    android:text="@String/cmd.up"
-	    android:onClick="upClick"/>
+	    android:text="@string/cmd.up"
+	    android:onClick="onUpClick"/>
 </LinearLayout>
 <ListView android:id="@+id/file_list"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
 	android:layout_weight="1"/>
-<TextView android:id="statusBar"
+<TextView android:id="@+id/status_bar"
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 
-    android:text="@String/status.ready" />
+    android:text="@string/status.ready" />
 </LinearLayout>
 

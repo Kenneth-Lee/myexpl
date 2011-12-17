@@ -1,6 +1,7 @@
 tags
 *~
-*.bat
+*.bak
 *.bk
-bin/*
 bin
+gen
+*.swp

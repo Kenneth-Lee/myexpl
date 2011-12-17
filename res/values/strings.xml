@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MyExpl</string>
+    <string name="cmd.home">Home</string>
+    <string name="cmd.up">Up</string>
+    <string name="status.ready">Ready</string>
+</resources>

@@ -18,6 +18,11 @@
 	    android:layout_height="wrap_content"
 	    android:text="@string/cmd.up"
 	    android:onClick="onUpClick"/>
+    <Button 
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:text="@string/cmd.select_mode"
+	    android:onClick="onSelectModeClick"/>
 </LinearLayout>
 <ListView android:id="@+id/file_list"
 	android:layout_width="fill_parent"
@@ -26,6 +31,6 @@
 <TextView android:id="@+id/status_bar"
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 
-    android:text="@string/status.ready" />
+    android:text="@string/info.ready" />
 </LinearLayout>
 

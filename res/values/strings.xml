@@ -3,5 +3,12 @@
     <string name="app_name">MyExpl</string>
     <string name="cmd.home">Home</string>
     <string name="cmd.up">Up</string>
-    <string name="status.ready">Ready</string>
+    <string name="cmd.select_mode">Sele</string>
+    <string name="cmd.left">Left</string>
+    <string name="cmd.right">Right</string>
+    <string name="info.ready">Ready</string>
+    <string name="info.multi_choice_mode">MultiChoice</string>
+    <string name="info.single_choice_mode">SingleChoice</string>
+    <string name="info.none_choice_mode">  </string>
+    <string name="info.nofile">Not File Found</string>
 </resources>

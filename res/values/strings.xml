@@ -5,10 +5,20 @@
     <string name="cmd.up">Up</string>
     <string name="cmd.select_mode">Sele</string>
     <string name="cmd.left">Left</string>
-    <string name="cmd.right">Right</string>
+    <string name="cmd.delete">Delete</string>
     <string name="info.ready">Ready</string>
     <string name="info.multi_choice_mode">MultiChoice</string>
     <string name="info.single_choice_mode">SingleChoice</string>
     <string name="info.none_choice_mode">  </string>
-    <string name="info.nofile">Not File Found</string>
+    <string name="info.nofile">No File Found</string>
+    <string name="info.setmask">File Mask</string>
+    <string name="info.ok">OK</string>
+    <string name="cmd.start">Open</string>
+    <string name="cmd.rename">Rename</string>
+    <string name="info_rename">Rename</string>
+    <string name="no_image">[V]</string>
+    <string name="info.exception">fail with message: </string>
+    <string name="cmd.mkdir">mkdir</string>
+    <string name="cmd.createfile">create file</string>
+    <string name="info_cancel">Cancel</string>
 </resources>

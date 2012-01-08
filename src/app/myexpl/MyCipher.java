@@ -10,18 +10,25 @@ public class MyCipher {
 
     private final static String alg = "AES";
 
-    private Cipher createCipher(String password, int mode) throws Exception {
+    private static Cipher createCipher(String password, int mode) throws Exception {
         SecretKeySpec skeySpec = new SecretKeySpec(getRawKey(password.getBytes()), alg);
         Cipher cipher = Cipher.getInstance(alg);
         cipher.init(mode, skeySpec);
         return cipher;
     }
 
-    public byte[] encrypt(String password, byte[] data) throws Exception {
+    public static void mask(String password, byte[] data) throws Exception {
+        byte[] raw = getRawKey(password.getBytes());
+        for(int i=0; i<data.length; i++) {
+            data[i] = (byte)(data[i]^raw[i%raw.length]);
+        }
+    }
+
+    public static byte[] encrypt(String password, byte[] data) throws Exception {
         return createCipher(password, Cipher.ENCRYPT_MODE).doFinal(data);
     }
     
-    public byte[] decrypt(String password, byte[] data) throws Exception {
+    public static byte[] decrypt(String password, byte[] data) throws Exception {
         return createCipher(password, Cipher.DECRYPT_MODE).doFinal(data);
     }
 

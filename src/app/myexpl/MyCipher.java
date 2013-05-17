@@ -11,17 +11,20 @@ public class MyCipher {
     private final static String alg = "AES";
 
     private static Cipher createCipher(String password, int mode) throws Exception {
-        SecretKeySpec skeySpec = new SecretKeySpec(getRawKey(password.getBytes()), alg);
+        SecretKeySpec skeySpec = new SecretKeySpec(getRawKey(password), alg);
         Cipher cipher = Cipher.getInstance(alg);
         cipher.init(mode, skeySpec);
         return cipher;
     }
 
+    public static void mask(byte[] rawkey, byte[] data, int len) throws Exception {
+        for(int i=0; i<len; i++) {
+            data[i] = (byte)(data[i]^rawkey[i%rawkey.length]);
+        }    	
+    }
+    
     public static void mask(String password, byte[] data) throws Exception {
-        byte[] raw = getRawKey(password.getBytes());
-        for(int i=0; i<data.length; i++) {
-            data[i] = (byte)(data[i]^raw[i%raw.length]);
-        }
+    	mask(getRawKey(password), data, data.length);
     }
 
     public static byte[] encrypt(String password, byte[] data) throws Exception {
@@ -32,7 +35,8 @@ public class MyCipher {
         return createCipher(password, Cipher.DECRYPT_MODE).doFinal(data);
     }
 
-    private static byte[] getRawKey(byte[] seed) throws Exception {
+    public static byte[] getRawKey(String password) throws Exception {
+    	byte[] seed = password.getBytes();
         KeyGenerator kgen = KeyGenerator.getInstance(alg);
         SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
         sr.setSeed(seed);

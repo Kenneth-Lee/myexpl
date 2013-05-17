@@ -3,13 +3,10 @@
     <string name="app_name">MyExpl</string>
     <string name="cmd.home">Home</string>
     <string name="cmd.up">Up</string>
-    <string name="cmd.select_mode">Sele</string>
+    <string name="cmd.refresh">Refresh</string>
     <string name="cmd.left">Left</string>
     <string name="cmd.delete">Delete</string>
     <string name="info.ready">Ready</string>
-    <string name="info.multi_choice_mode">MultiChoice</string>
-    <string name="info.single_choice_mode">SingleChoice</string>
-    <string name="info.none_choice_mode">  </string>
     <string name="info.nofile">No File Found</string>
     <string name="info.setmask">File Mask</string>
     <string name="info.ok">OK</string>
@@ -21,4 +18,31 @@
     <string name="cmd.mkdir">mkdir</string>
     <string name="cmd.createfile">create file</string>
     <string name="info_cancel">Cancel</string>
+    <string name="head_hex_view">HeadHexView</string>
+    <string name="info.empty_file">empty file</string>
+    <string name="cmd.options">Options</string>
+    <string name="pref.cperline">Char per line</string>
+    <string name="pref.headsize">Head Size</string>
+    <string name="mask_to">maskTo</string>
+    <string name="cmd.mask">Mask</string>
+    <string name="info.pass_first">please input password first</string>
+    <string name="info.done_mask">Done Mask</string>
+    <string name="info.to_be_exit">Press back again to exit</string>
+    <string name="cmd.buf1">buf1</string>
+    <string name="cmd.buf2">buf2</string>
+    <string name="cmd.clickfor">Click For&#8230;</string>
+    <string name="cmd.properties">Properties</string>
+    <string name="cmd.paste_buf">Paste Buffer</string>
+    <string name="cmd.move_buf">Move Buffer</string>
+    <string name="info.on_masking">Masking(Don\'t stop the process)&#8230;</string>
+    <string-array name="cmd_click_for_what">
+        <item>Open</item>
+        <item>Buf1 Select</item>
+        <item>Buf2 Select</item>
+        <item>Smart Rename</item>
+    </string-array>
+    <string-array name="cmd_buffers">
+        <item>Buf1</item>
+        <item>Buf2</item>
+    </string-array>
 </resources>

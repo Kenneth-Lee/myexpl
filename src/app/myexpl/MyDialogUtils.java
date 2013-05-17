@@ -36,6 +36,14 @@ class MyDialogUtils {
         	.create();
     }
     
+    Dialog createSelectList(int titleId, int itemsId, DialogInterface.OnClickListener listener) {
+    	return new AlertDialog.Builder(app)
+    	    .setTitle(titleId)
+    	    .setCancelable(true)
+    	    .setSingleChoiceItems(itemsId, -1, listener)
+    	    .create();
+    }
+    
     void showDialog(int id, String initText) {
     	inputDialogInitText = initText;
     	app.showDialog(id);

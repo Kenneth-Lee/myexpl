@@ -1,8 +1,15 @@
 package app.myexpl;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -11,8 +18,11 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.provider.MediaStore.Images;
 
+@TargetApi(8)
 public class Utils {
 
+	private static final String fs = System.getProperty("file.separator");
+	
     public static String fileSize(long s) {
         if(s>1024*1024*1024) {
             return s/(1024*1024*1024)+"GB";
@@ -82,6 +92,12 @@ public class Utils {
     	}
     }
 
+    public static void openFileWithSpecApp(String name, Activity app, File f) {
+		Intent i = new Intent(name);
+		i.setDataAndType(Uri.fromFile(f), null);
+		app.startActivity(i);
+    }
+    
     public static void openFileWithApp(Activity app, File f) {
 		Intent i = new Intent(android.content.Intent.ACTION_VIEW);
 		i.setDataAndType(Uri.fromFile(f), Utils.getMimeType(f.getName()));
@@ -208,19 +224,97 @@ public class Utils {
 
     public static String getPath(File file) {
     	String path = file.getAbsolutePath();
-    	int i = path.lastIndexOf(System.getProperty("file.separator"));
+    	int i = path.lastIndexOf(fs);
     	if(i==-1) {
     		throw new RuntimeException("invalid file name");
     	}
     	return path.substring(0, i);
     }
     
+    public static String getFilenameNoPath(File file) {
+    	String path = file.getAbsolutePath();
+    	int i = path.lastIndexOf(fs);
+    	if(i==-1) {
+    		throw new RuntimeException("invalid file name");
+    	}
+    	return path.substring(i+1, path.length());
+    }
+    
 	public static void rename(File file, String newname) {	
-		file.renameTo(new File(getPath(file)+System.getProperty("file.separator")+newname));
+		file.renameTo(new File(getPath(file)+fs+newname));
 	}
 	
 	public static String combinePath(File root, String name) {
-		return root.getAbsolutePath()+System.getProperty("file.separator")+name;
+		return root.getAbsolutePath()+fs+name;
 	}
-    
+
+	public static void moveFiles(ArrayList<File> fileList, File targetPath) {
+		for(File f: fileList) {
+			moveFile(f, targetPath);
+		}
+	}
+
+	public static void moveFile(File file, File targetPath) {
+		String path = getPath(file);
+        
+		if(!path.equals(targetPath)) {
+            file.renameTo(new File(getPath(targetPath)+fs+getFilenameNoPath(file)));		
+		}
+	}
+
+	public static void copyFiles(ArrayList<File> fileList, File targetPath) throws IOException {
+		for(File f: fileList) {
+			copyFile(f, targetPath);
+		}
+	}
+
+	public static void copyFile(File sourceFile, File targetPath) throws IOException {
+	    File targetFile = new File(targetPath.getPath()+fs+getFilenameNoPath(sourceFile));
+	    if(targetFile.exists())
+	    	throw new IOException("File Exist");
+	    
+		FileInputStream input = new FileInputStream(sourceFile);  
+		BufferedInputStream inBuff = new BufferedInputStream(input);  
+			  
+		FileOutputStream output = new FileOutputStream(targetFile);  
+		BufferedOutputStream outBuff=new BufferedOutputStream(output);  
+			          
+		byte[] b = new byte[1024 * 5];  
+		int len;  
+		while ((len =inBuff.read(b)) != -1) {  
+			outBuff.write(b, 0, len);  
+		}  
+		outBuff.flush();  
+			          
+		inBuff.close();  
+		outBuff.close();  
+		output.close();  
+		input.close();  
+    }  
+			    // 复制文件夹   
+			    public static void copyDirectiory(String sourceDir, String targetDir)  
+			            throws IOException {  
+			        // 新建目标目录   
+			        (new File(targetDir)).mkdirs();  
+			        // 获取源文件夹当前下的文件或目录   
+			        File[] file = (new File(sourceDir)).listFiles();  
+			        for (int i = 0; i < file.length; i++) {  
+			            if (file[i].isFile()) {  
+			                // 源文件   
+			                File sourceFile=file[i];  
+			                // 目标文件   
+			               File targetFile=new   
+			File(new File(targetDir).getAbsolutePath()  
+			+File.separator+file[i].getName());  
+			                copyFile(sourceFile,targetFile);  
+			            }  
+			            if (file[i].isDirectory()) {  
+			                // 准备复制的源文件夹   
+			                String dir1=sourceDir + "/" + file[i].getName();  
+			                // 准备复制的目标文件夹   
+			                String dir2=targetDir + "/"+ file[i].getName();  
+			                copyDirectiory(dir1, dir2);  
+			            }  
+			        }  
+			    }  
 }

@@ -12,5 +12,26 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
+        <activity android:label="@string/head_hex_view" android:name="HeadHexViewer" 
+            android:launchMode="singleTop"
+            android:icon="@drawable/hexview">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file" />
+            </intent-filter>
+        </activity>
+        <activity android:label="@string/mask_to" android:name="MaskTo" android:launchMode="singleTop"
+            android:icon="@drawable/mask">/
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file" />
+                <data android:mimeType="*/*.klf" />
+                <data android:mimeType="*/*.kle" />
+            </intent-filter>
+        </activity>
+        </application>
 </manifest> 

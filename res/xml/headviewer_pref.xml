@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <EditTextPreference android:title="@string/pref.cperline" android:defaultValue="8" android:key="cPerLine"/>
+    <EditTextPreference android:title="@string/pref.headsize" android:defaultValue="256" android:key="headsize"/>
+</PreferenceScreen>

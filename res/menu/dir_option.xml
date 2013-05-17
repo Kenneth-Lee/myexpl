@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/fmenu_delete"
+	    android:title="@string/cmd.delete" />
+    <item android:id="@+id/fmenu_rename" android:title="@string/cmd.rename"></item>
+</menu>

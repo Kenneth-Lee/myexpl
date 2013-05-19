@@ -45,4 +45,5 @@
         <item>Buf1</item>
         <item>Buf2</item>
     </string-array>
+    <string name="cmd.mask_buf">Mask Current Buffer</string>
 </resources>

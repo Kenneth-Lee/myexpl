@@ -10,7 +10,8 @@
 <EditText android:id="@+id/password_edit"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:password="true"
+    android:inputType="textVisiblePassword"
+    android:enabled="true"
     android:scrollHorizontally="true"/>
 <CheckBox android:id="@+id/if_full_mask_checkbox"
     android:layout_width="fill_parent"
@@ -20,6 +21,5 @@
 <Button android:id="@+id/maskButton"
     android:text="@string/cmd.mask"
 	android:layout_width="fill_parent"
-	android:layout_height="wrap_content"
-	android:onClick="onMaskClick"/>
+	android:layout_height="wrap_content"/>
 </LinearLayout>

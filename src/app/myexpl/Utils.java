@@ -104,9 +104,29 @@ public class Utils {
 		app.startActivity(i);
     }
     
+    public static int getFileIcon(String path) {
+    	String mt = getMimeType(path);
+    	if(mt.startsWith("audio/")) {
+    		return R.drawable.audio;
+    	}else if(mt.startsWith("video/")) {
+    		return R.drawable.video;
+    	}else if(mt.startsWith("text/")) {
+    		return R.drawable.text;
+    	}else if(mt.startsWith("application/")) {
+    		if(mt.endsWith("/mask")) {
+    			return R.drawable.full_mask;
+    		}else if(mt.endsWith("/mask-head")) {
+    			return R.drawable.part_mask;
+    		}else {
+    			return R.drawable.binary;
+    		}
+    	}else {
+    		return R.drawable.file;
+    	}
+    }
+
     public static String getMimeType(String path) {
     	final String[][] MIME_MapTable={  
-                //{后缀名， MIME类型}  
                 {".3gp",    "video/3gpp"},  
                 {".apk",    "application/vnd.android.package-archive"},  
                 {".asf",    "video/x-ms-asf"},  
@@ -172,6 +192,8 @@ public class Utils {
                 {".xml",    "text/plain"},  
                 {".z",  "application/x-compress"},  
                 {".zip",    "application/x-zip-compressed"},  
+                {".klf",	"application/mask"},
+                {".kle",	"application/mask-head"},
                 {"",        "*/*"}    
     	};
     	
@@ -291,30 +313,34 @@ public class Utils {
 		output.close();  
 		input.close();  
     }  
-			    // 复制文件夹   
-			    public static void copyDirectiory(String sourceDir, String targetDir)  
-			            throws IOException {  
-			        // 新建目标目录   
-			        (new File(targetDir)).mkdirs();  
-			        // 获取源文件夹当前下的文件或目录   
-			        File[] file = (new File(sourceDir)).listFiles();  
-			        for (int i = 0; i < file.length; i++) {  
-			            if (file[i].isFile()) {  
-			                // 源文件   
-			                File sourceFile=file[i];  
-			                // 目标文件   
-			               File targetFile=new   
-			File(new File(targetDir).getAbsolutePath()  
-			+File.separator+file[i].getName());  
-			                copyFile(sourceFile,targetFile);  
-			            }  
-			            if (file[i].isDirectory()) {  
-			                // 准备复制的源文件夹   
-			                String dir1=sourceDir + "/" + file[i].getName();  
-			                // 准备复制的目标文件夹   
-			                String dir2=targetDir + "/"+ file[i].getName();  
-			                copyDirectiory(dir1, dir2);  
-			            }  
-			        }  
-			    }  
+	
+	public static void copyDirectiory(String sourceDir, String targetDir)  throws IOException {
+		(new File(targetDir)).mkdirs();  
+		File[] file = (new File(sourceDir)).listFiles();  
+			for (int i = 0; i < file.length; i++) {  
+				if (file[i].isFile()) {  
+					File sourceFile=file[i];  
+					File targetFile=new File(new File(targetDir).getAbsolutePath() + File.separator+file[i].getName());  
+					copyFile(sourceFile,targetFile);  
+				}  
+				
+				if (file[i].isDirectory()) {  
+					String dir1=sourceDir + File.separator + file[i].getName();  
+					String dir2=targetDir + "/"+ file[i].getName();  
+					copyDirectiory(dir1, dir2);  
+				}  
+			}  
+	}
+
+	public static void deleteDir(File file) {
+		if(file.isDirectory()) {
+			File[] f = file.listFiles();  
+			for (int i = 0; i < f.length; i++) {  
+				deleteDir(f[i]);
+			}
+			file.delete();
+		}else {
+			file.delete();
+		}
+	}  
 }

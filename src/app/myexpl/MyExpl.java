@@ -7,54 +7,41 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Stack;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import app.myexpl.MyDialogUtils.MyInputDialogHelper;
+import app.myexpl.MyDialogUtils.MyOKListener;
 
 public class MyExpl extends MyActivity
 {
     private TextView statusBar;
 	private ListView fileListView;
 
-    private static final int DIALOG_PASSWORD_ID = 0;
-    private static final int DIALOG_DELETE_ID = 1;
-    private static final int DIALOG_RENAME_ID = 2;
-    private static final int DIALOG_CREATE_FILE_ID = 3;
-    private static final int DIALOG_MKDIR_ID = 4;
-    private static final int DIALOG_CLICK_FOR_ID = 5;
-    private static final int DIALOG_PASTE_MOVE_BUF_ID = 6;
-    
 	private static final int OMENU_MKDIR = 0;
 	private static final int OMENU_CREATE_FILE = 1;
     private static final int OMENU_CLICK_FOR = 2;
     private static final int OMENU_PASTE_BUF = 3;
     private static final int OMENU_MOVE_BUF = 4;
+    private static final int OMENU_MASK_BUF = 5;
     
-    private final int M_DISMISS_PROGRESS_DIALOG = 1;
-    private final int M_SHOW_LIST = 2;
-    private final int M_UPDATE_THUMB = 3;
-
     private ArrayList<File> buf1 = new ArrayList<File>();
     private ArrayList<File> buf2 = new ArrayList<File>();
     private ArrayList<File> curBuf = null;
@@ -66,7 +53,6 @@ public class MyExpl extends MyActivity
     
     private MyDialogUtils dialogUtils = new MyDialogUtils(this);
     
-    private EditText passEdit,renameEdit,dirEdit,newfileEdit;
     private Button buf1Btn, buf2Btn;
     
     enum ClickMode {
@@ -96,205 +82,11 @@ public class MyExpl extends MyActivity
     }
     private Stack<HistoryItem> logger = new Stack<HistoryItem>();
     private boolean isPreExit = false;
-	private boolean isShowThumb = false;
+	private boolean isPreview = false;
+	
     private void addHistory(String path, int x, int y) {
     	logger.push(new HistoryItem(path, x, y));
     	isPreExit=false;
-    }
-    
-    private class SetFileListData {
-    	File[] list;
-    	Object obj;
-    	SetFileListData(File[] list, Object obj) {
-    		this.list = list;
-    		this.obj = obj;
-    	}
-    };
-    
-    private class ThumbData {
-    	File file;
-    	ImageView view;
-    	ThumbData(File file) {
-    		this.file = file;
-    	}
-    	void sendUpdateMessage(Handler h, ImageView v) {
-    		view = v;
-    		Message msg = new Message();
-    		msg.what = M_UPDATE_THUMB;
-    		msg.obj = this;
-    		h.sendMessage(msg);
-    	}
-    }
-    
-    protected boolean handleMessage(Message msg) {
-		switch(msg.what) {
-		case M_DISMISS_PROGRESS_DIALOG:
-			ProgressDialog pd = (ProgressDialog)msg.obj;
-			pd.dismiss();
-			return true;
-		case M_SHOW_LIST:
-			SetFileListData data = (SetFileListData)msg.obj;
-			setFileListSync(data.list);
-			Message rmsg = new Message();
-			rmsg.what = M_DISMISS_PROGRESS_DIALOG;
-			rmsg.obj = data.obj;
-			handler.sendMessage(rmsg);
-			return true;
-		case M_UPDATE_THUMB:
-			ThumbData tData = (ThumbData)msg.obj;
-			Bitmap bm = Utils.loadThumbnailImage(tData.file, 72, 72);
-			if(bm!=null) {
-				tData.view.setImageBitmap(bm);
-			}
-			return true;
-		}
-        return false;
-	}
-
-    
-    @Override
-	protected void onPrepareDialog(int id, Dialog dialog) {
-    	switch(id) {
-    	case DIALOG_PASSWORD_ID:
-    	case DIALOG_RENAME_ID:
-    	case DIALOG_CREATE_FILE_ID:
-    	case DIALOG_MKDIR_ID:
-    		dialogUtils.putInputDialogInitState(dialog);
-    		return;
-    	}
-		super.onPrepareDialog(id, dialog);
-	}
-
-    private void showException(Exception e) {
-    	qmsg(getString(R.string.info_exception)+e.getMessage());
-    }
-    
-	protected Dialog onCreateDialog(int id) {
-        Dialog dialog;
-
-        switch(id) {
-            case DIALOG_PASSWORD_ID:
-                dialog = dialogUtils.createInputDialog(R.string.info_setmask,new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            try {
-                                FileCipher.mask(passEdit.getText().toString(), selectedFile, maskLen);
-                                selectedFile.renameTo(new File(Utils.switchNameExt(selectedFile.getAbsolutePath(), "kle")));
-                                setRoot(currentRoot);
-                            }catch(Exception e) {
-                                showException(e);
-                                return;
-                            }
-                            qmsg("done mask");
-                            passEdit.setText("");
-                        }
-                });
-                passEdit = dialogUtils.edit;
-                break;
-
-            case DIALOG_DELETE_ID:
-            	dialog = new AlertDialog.Builder(this)
-            	    .setMessage("are you sure?")
-            	    .setCancelable(true)
-            	    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							try {
-									selectedFile.delete();
-									if(curBuf!=null) {
-										curBuf.remove(selectedFile);
-									}
-							}catch(Exception e) {
-								showException(e);
-							}
-							refresh();
-						}
-					})
-					.setNegativeButton("Cancel", null).create();
-            	break;
-            	
-            case DIALOG_RENAME_ID:
-                dialog = dialogUtils.createInputDialog(R.string.info_rename, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                        	String newname=renameEdit.getText().toString();
-                        	newname=newname.trim();
-                        	if(newname=="") return;
-                            try {
-                                Utils.rename(selectedFile, newname);
-                                refresh();
-                            }catch(Exception e) {
-                                showException(e);
-                                return;
-                            }
-                        }
-                    });
-                renameEdit = dialogUtils.edit;
-                break;
-            
-            case DIALOG_MKDIR_ID:
-                dialog = dialogUtils.createInputDialog(R.string.cmd_mkdir, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                        	String name=dirEdit.getText().toString();
-                        	name=name.trim();
-                        	if(name=="") return;
-                            try {
-                            	File file = new File(Utils.combinePath(currentRoot, name));
-                            	file.mkdir();
-                                refresh();
-                            }catch(Exception e) {
-                                showException(e);
-                                return;
-                            }
-                        }
-                    });
-                dirEdit = dialogUtils.edit;
-                break;
-                
-            case DIALOG_CREATE_FILE_ID:
-                dialog = dialogUtils.createInputDialog(R.string.cmd_createfile, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                        	String name=newfileEdit.getText().toString();
-                        	name=name.trim();
-                        	if(name=="") return;
-                            try {
-                            	File file = new File(Utils.combinePath(currentRoot, name));
-                                file.createNewFile();
-                                refresh();
-                            }catch(Exception e) {
-                                qmsg(getString(R.string.info_exception) + e.getMessage());
-                                return;
-                            }
-                        }
-                    });
-                newfileEdit = dialogUtils.edit;
-                break;
-
-            case DIALOG_CLICK_FOR_ID:
-            	dialog = dialogUtils.createSelectList(R.string.cmd_clickfor, R.array.cmd_click_for_what, 
-            			new DialogInterface.OnClickListener() {
-            	    public void onClick(DialogInterface dialog, int item) {
-                        setClickMode(ClickMode.fromInt(item));
-                        dialog.dismiss();
-            	    }
-            	});
-                break;
-                
-            case DIALOG_PASTE_MOVE_BUF_ID:
-                int title_id = omenu_item==OMENU_PASTE_BUF?R.string.cmd_paste_buf:R.string.cmd_move_buf;
-                dialog = dialogUtils.createSelectList(title_id, R.array.cmd_buffers, 
-            			new DialogInterface.OnClickListener() {
-            	    public void onClick(DialogInterface dialog, int item) {
-                        assert(item<2);
-                        paste_move_buffer(bufList[item]);
-                        dialog.dismiss();
-            	    }
-            	});
-            	break;
-                
-            default:
-                dialog = null;
-                break;
-        }
-        return dialog;
     }
     
     private void paste_move_buffer(ArrayList<File> buf) {
@@ -312,11 +104,25 @@ public class MyExpl extends MyActivity
         	}
         }else {
         	if(curBuf!=buf) {
-        		
+        		for(File f: buf) {
+        			if(!curBuf.contains(f)) {
+        				curBuf.add(f);
+        			}
+        		}
+        		refresh();
         	}
         }
         
         refresh();
+    }
+    
+    private boolean isRefreshOnDemand = true;
+    
+    /** refresh file list only if isRefreshOnDemand is not set */
+    public void lazyRefresh() {
+    	if(!isRefreshOnDemand) {
+    		refresh();
+    	}
     }
     
 	public void refresh() {
@@ -358,18 +164,16 @@ public class MyExpl extends MyActivity
     	setFileList(genFileList(list));
     }
     
-    private void setFileList(File[] list) {
-    	handler.removeMessages(M_UPDATE_THUMB);
-    	ProgressDialog pd = new ProgressDialog(this);
-    	pd.setMessage("Please wait");
+    private void setFileList(final File[] list) {
+    	final Dialog pd = dialogUtils.createProgressDialog("Please wait");
     	pd.show();
-        if(isShowThumb ) {
-    	    Message msg = new Message();
-    	    SetFileListData data = new SetFileListData(list, pd);
-        	msg.what = M_SHOW_LIST;
-        	msg.obj = data;
-        	handler.sendMessage(msg);
-        }
+    	asynDo(0, new MyMsgObject() {
+			public void doMsg() {
+				setFileListSync(list);
+				pd.dismiss();
+			}
+    		
+    	});
     }
     
     private void setFileListSync(File[] list) {
@@ -391,6 +195,8 @@ public class MyExpl extends MyActivity
                 fileList, R.layout.file_list,
                 new String[] {"icon", "filename", "info"},
                 new int[]{R.id.fileicon, R.id.filename, R.id.fileinfo});
+        
+        /*
         adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
 			
 			@Override
@@ -405,6 +211,7 @@ public class MyExpl extends MyActivity
 				return false;
 			}
 		});
+		*/
         fileListView.setAdapter(adapter);    	
         showStatus(len+" items"+getListType());
     }
@@ -432,7 +239,16 @@ public class MyExpl extends MyActivity
             }
         }else {
             map.put("info", genFileInfo(f));
-            map.put("icon", new ThumbData(f));
+            	Bitmap bm = null;
+            if(isPreview) {
+            	bm = Utils.loadThumbnailImage(f, 72, 72);
+            }
+            
+            if(bm==null) {
+            	map.put("icon", Utils.getFileIcon(f.getName()));
+            }else {
+            	map.put("icon", bm);
+            }
         }
         map.put("filename", f.getName());
         return map;
@@ -510,6 +326,28 @@ public class MyExpl extends MyActivity
             }
         });
 
+        buf1Btn.setOnLongClickListener(new OnLongClickListener() {
+			public boolean onLongClick(View v) {
+				if(clickMode == ClickMode.CLICK4BUF1) {
+					setClickMode(ClickMode.CLICK4OPEN);
+				}else {
+					setClickMode(ClickMode.CLICK4BUF1);
+				}
+				return false;
+			}
+        });
+        
+        buf2Btn.setOnLongClickListener(new OnLongClickListener() {
+			public boolean onLongClick(View v) {
+				if(clickMode == ClickMode.CLICK4BUF2) {
+					setClickMode(ClickMode.CLICK4OPEN);
+				}else {
+					setClickMode(ClickMode.CLICK4BUF2);
+				}
+				return false;
+			}
+        });
+        
         setRoot(Environment.getExternalStorageDirectory(), true);
     }
 
@@ -611,7 +449,7 @@ public class MyExpl extends MyActivity
     @Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if(keyCode==KeyEvent.KEYCODE_BACK) {
-            if(clickMode!=ClickMode.CLICK4OPEN) {
+			if(clickMode!=ClickMode.CLICK4OPEN) {
                 setClickMode(ClickMode.CLICK4OPEN);
                 return true;
             }else if(logger.isEmpty()) {
@@ -630,23 +468,65 @@ public class MyExpl extends MyActivity
 				return true;
 			}
 		}else 
-			return super.onKeyUp(keyCode, event);
+			return super.onKeyDown(keyCode, event);
 	}
 
 	public boolean onContextItemSelected(MenuItem item) {
         switch(item.getItemId()) {
-            case R.id.fmenu_delete:
-                showDialog(DIALOG_DELETE_ID);
-                return true;
+        case R.id.fmenu_mask:
+        	MaskTo mt = MaskTo.getWin(this);
+        	mt.show(selectedFile, this.fileListView);
+        	mt.setFinishListener(new FinishListener() {
+        		public void onFinish() {
+        			asynDo(0, new MyMsgObject() {
+						public void doMsg() {
+							refresh();
+						}
+        			});
+        		}
+        	});
+        	return true;
+            
+        case R.id.fmenu_headview:
+        	HeadHexViewer hhv = HeadHexViewer.getViewer(this);
+        	hhv.show(selectedFile, this.fileListView);
+        	return true;
+        	
+        case R.id.fmenu_delete:
+            	dialogUtils.createComfirmDialog(new OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						try {
+							Utils.deleteDir(selectedFile);
+							if(curBuf!=null) {
+								curBuf.remove(selectedFile);
+							}
+						}catch(Exception e) {
+							showException(e);
+						}
+						refresh();
+					}
+            	}).show();
+            	return true;
+            	
             case R.id.fmenu_rename:
-            	dialogUtils.showDialog(DIALOG_RENAME_ID, selectedFile.getName());
+            	final MyInputDialogHelper dlg = dialogUtils.createInputDialog(R.string.info_rename);
+            	dlg.edit.setText(selectedFile.getName());
+            	dlg.setOKListener(new MyDialogUtils.MyOKListener() {
+            		public void onOK(String text) {
+            			if(text.length()==0) return;
+                     try {
+                    	 Utils.rename(selectedFile, text);
+                     }catch(Exception e) {
+                    	 showException(e);
+                     }finally {
+                    	 refresh();
+                        }
+                     	
+					}
+            	});
+            	dlg.dialog.show();
             	return true;
-            case R.id.fmenu_headview:
-                //TODO
-            	return true;
-            case R.id.fmenu_mask:
-                //TODO
-            	return true;
+            	
             default:
                 return super.onContextItemSelected(item);
         }
@@ -658,6 +538,7 @@ public class MyExpl extends MyActivity
         menu.add(0, OMENU_CLICK_FOR, 0, getString(R.string.cmd_clickfor));
         menu.add(0, OMENU_PASTE_BUF, 0, getString(R.string.cmd_paste_buf));
         menu.add(0, OMENU_MOVE_BUF, 0, getString(R.string.cmd_move_buf));
+        menu.add(0, OMENU_MASK_BUF, 0, getString(R.string.cmd_mask_buf));
     	return super.onCreateOptionsMenu(menu);
     }
     
@@ -665,19 +546,90 @@ public class MyExpl extends MyActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case OMENU_MKDIR:            	
-            	dialogUtils.showDialog(DIALOG_MKDIR_ID, "");
+            {
+                final MyInputDialogHelper dlg = dialogUtils.createInputDialog(R.string.cmd_mkdir);
+                dlg.setOKListener(new MyOKListener() {
+						public void onOK(String text) {
+                        	if(text.length()==0) return;
+                        	try {
+                        		File file = new File(Utils.combinePath(currentRoot, text));
+                        		file.mkdir();
+                        	}catch(Exception e) {
+                        		showException(e);
+                        	}finally {
+                        		refresh();
+                        	}
+						}
+                });
+                dlg.dialog.show();
+            }
                 return true;
+                
             case OMENU_CREATE_FILE:
-            	dialogUtils.showDialog(DIALOG_CREATE_FILE_ID, "");
-            	return true;
-            case OMENU_CLICK_FOR:
-                showDialog(DIALOG_CLICK_FOR_ID);
+            {
+                final MyInputDialogHelper dlg = dialogUtils.createInputDialog(R.string.cmd_createfile);
+                dlg.setOKListener(new MyOKListener() {
+						public void onOK(String text) {
+                        	if(text.length()==0) return;
+                        	try {
+                        		File file = new File(Utils.combinePath(currentRoot, text));
+                        		file.createNewFile();
+                        	}catch(Exception e) {
+                        		qmsg(getString(R.string.info_exception) + e.getMessage());
+                        	}finally {
+                        		refresh();
+                            }
+						}
+                    });
+                dlg.dialog.show();
+            }
                 return true;
+            	
+            case OMENU_CLICK_FOR:
+            	dialogUtils.createSelectList(R.string.cmd_clickfor, R.array.cmd_click_for_what, 
+            			new DialogInterface.OnClickListener() {
+            	    public void onClick(DialogInterface dialog, int item) {
+                        setClickMode(ClickMode.fromInt(item));
+                        dialog.dismiss();
+            	    }
+            	}).show();
+                return true;
+                
             case OMENU_PASTE_BUF:
             case OMENU_MOVE_BUF:
-                omenu_item = item.getItemId();
-                showDialog(DIALOG_PASTE_MOVE_BUF_ID);
-                return true;
+            	int title_id = omenu_item==OMENU_PASTE_BUF?R.string.cmd_paste_buf:R.string.cmd_move_buf;
+            	omenu_item = item.getItemId();
+            	dialogUtils.createSelectList(title_id, R.array.cmd_buffers, new OnClickListener() {
+            		public void onClick(DialogInterface dialog, int item) {
+            			assert(item<2);
+            			paste_move_buffer(bufList[item]);
+            			dialog.dismiss();
+            	    }
+            	}).show();
+            	return true;
+                
+            case OMENU_MASK_BUF:
+            	if(this.curBuf == null) {
+            		qmsg("no buffer seleted");
+            		return true;
+            	}
+            	
+            	MaskTo mt = MaskTo.getWin(this);
+            	mt.show(curBuf, this.fileListView);
+            	mt.setFinishListener(new FinishListener() {
+            		public void onFinish() {
+            			asynDo(0, new MyMsgObject() {
+            				public void doMsg() {
+            					curBuf.clear();
+            					curBuf = null;
+            					setRoot(currentRoot, false);
+            					
+            				}
+            			});
+            		}
+            	});
+            	return true;
+            	
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -699,6 +651,10 @@ public class MyExpl extends MyActivity
     protected void onResume() {
         super.onResume();
 
+        if(currentRoot!=null) {
+        	return;
+        }
+        
         SharedPreferences prefs = getPreferences(0);
         String r = prefs.getString("root", null);
         if(r!=null) {

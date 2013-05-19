@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="app.myexpl"
-      android:versionCode="1"
-      android:versionName="1.0">
-    <application android:label="@string/app_name" >
+      android:versionCode="2"
+      android:versionName="2.0">
+     <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="17" />
+     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+     
+    <application android:label="@string/app_name" android:icon="@drawable/myexpl">
         <activity android:name="MyExpl"
                   android:label="@string/app_name"
 		  android:icon="@drawable/myexpl">
@@ -12,14 +15,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- 
         <activity android:label="@string/head_hex_view" android:name="HeadHexViewer" 
             android:launchMode="singleTop"
             android:icon="@drawable/hexview">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="file" />
+                <data android:mimeType="binary/binary" />
             </intent-filter>
         </activity>
         <activity android:label="@string/mask_to" android:name="MaskTo" android:launchMode="singleTop"
@@ -27,11 +30,9 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="file" />
-                <data android:mimeType="*/*.klf" />
-                <data android:mimeType="*/*.kle" />
+                <data android:mimeType="binary/binary" />
             </intent-filter>
         </activity>
+        -->
         </application>
 </manifest> 

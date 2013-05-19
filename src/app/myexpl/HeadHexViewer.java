@@ -1,42 +1,60 @@
 package app.myexpl;
 
+import java.io.File;
 import java.io.FileInputStream;
 
 import android.app.Activity;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.EditText;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
-public class HeadHexViewer extends Activity {
+public class HeadHexViewer extends MyPopupWindowHelper {
 	
-	private int headSize = 256;
+	private int headSize = 1024;
 	private TextView statusBar;
 	private EditText viewer;
+	static private HeadHexViewer hvviewer = null;
 	
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.hex_view);
-
-        statusBar = (TextView)findViewById(R.id.hex_viewer_status_bar);
-        viewer = (EditText)findViewById(R.id.hex_viewer);
-        
-        Uri uri = getIntent().getData();
-        String path = uri.getPath();
-        try {
-        	FileInputStream fis = new FileInputStream(path);
-        	byte[] buffer = new byte[headSize];
-        	int size = fis.read(buffer);
-        	fillViewer(buffer, size);
-        	viewer.scrollTo(0, 0);
-        	fis.close();
+    private HeadHexViewer(Activity app) {
+    	super(app);
+    	setRootView(R.layout.hex_view);
+    	viewer = (EditText)rootView.findViewById(R.id.hex_viewer);
+    	statusBar = (TextView)rootView.findViewById(R.id.hex_viewer_status_bar);
+    }
+    
+    static HeadHexViewer getViewer(Activity app) {
+    	if(hvviewer == null) {
+    		hvviewer = new HeadHexViewer(app);
+    	}
+    	
+    	return hvviewer;
+    }
+    
+    /**
+     * show the file head in the window
+     * @param f the file to view
+     * @param view the root view of parent window (cannot be null)
+     */
+    public void show(File f, View view) {
+       try {
+    	   FileInputStream fis = new FileInputStream(f);
+    	   byte[] buffer = new byte[headSize];
+    	   int size = fis.read(buffer);
+    	   fillViewer(buffer, size);
+    	   viewer.scrollTo(0, 0);
+    	   fis.close();
         }catch(Exception e) {
-        	viewer.setText(getString(R.string.info_exception)+e.getMessage());
+        	viewer.setText(app.getString(R.string.info_exception)+e.getMessage());
         }
-        statusBar.setText(path);
+       statusBar.setText(f.getAbsolutePath()+"(size:"+f.length()+")");
+       MyPopupWindowHelper.show(this, view);
     }
     
     private int cPerLine=8;

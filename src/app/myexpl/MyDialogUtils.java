@@ -3,17 +3,50 @@ package app.myexpl;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.text.InputType;
 import android.widget.EditText;
 
 class MyDialogUtils {
 	private Activity app;
 	String inputDialogInitText;
-	EditText edit;
+	final int EDIT_ID = 1;
 	
 	MyDialogUtils(Activity app) {
 		this.app = app;
+	}
+	
+	interface MyOKListener {
+		void onOK(String text);
+	}
+	
+	class MyInputDialogHelper implements OnClickListener {
+		Dialog dialog;
+		EditText edit;
+		MyOKListener listener;
+		
+		MyInputDialogHelper(Activity app, int titleId) {
+			edit = new EditText(app);
+	    	edit.setId(EDIT_ID);
+	    	edit.setInputType(InputType.TYPE_CLASS_TEXT);
+	       dialog = new AlertDialog.Builder(app)
+	        	.setTitle(titleId)
+	        	.setCancelable(true)
+	        	.setView(edit)
+	        	.setPositiveButton(R.string.info_ok, this)
+	        	.setNegativeButton(R.string.info_cancel, null)
+	        	.create();
+		}
+
+		public void onClick(DialogInterface arg0, int arg1) {
+			 listener.onOK(edit.getText().toString().trim());
+		}
+		
+		public void setOKListener(MyOKListener listener) {
+			this.listener = listener;
+		}
 	}
 	
 	/**
@@ -23,17 +56,8 @@ class MyDialogUtils {
 	 * @param listener
 	 * @return the created dialog
 	 */
-    Dialog createInputDialog(int titleId, DialogInterface.OnClickListener listener) {
-    	edit = new EditText(app);
-    	edit.setId(1);
-    	edit.setInputType(InputType.TYPE_CLASS_TEXT);
-        return new AlertDialog.Builder(app)
-        	.setTitle(titleId)
-        	.setCancelable(true)
-        	.setView(edit)
-        	.setPositiveButton(R.string.info_ok, listener)
-        	.setNegativeButton(R.string.info_cancel, null)
-        	.create();
+    MyInputDialogHelper createInputDialog(int titleId) {
+    	return new MyInputDialogHelper(app, titleId);
     }
     
     Dialog createSelectList(int titleId, int itemsId, DialogInterface.OnClickListener listener) {
@@ -44,16 +68,24 @@ class MyDialogUtils {
     	    .create();
     }
     
+    ProgressDialog createProgressDialog(String msgId) {
+    	ProgressDialog pd = new ProgressDialog(app);
+    	pd.setMessage(msgId);
+		return pd;
+    }
+    
+    AlertDialog createComfirmDialog(OnClickListener listener) {
+    	 return new AlertDialog.Builder(app)
+	    .setMessage("Are you sure?")
+	    .setCancelable(true)
+	    .setPositiveButton("OK", listener)
+	    .setNegativeButton("Cancel", null)
+	    .create();
+    }
+    
     void showDialog(int id, String initText) {
     	inputDialogInitText = initText;
     	app.showDialog(id);
     }
     
-    EditText getInputDialogText(Dialog dialog) {
-    	return (EditText)dialog.findViewById(1);
-    }    
-    
-    void putInputDialogInitState(Dialog dialog) {
-    	getInputDialogText(dialog).setText(inputDialogInitText);
-    }
 }
